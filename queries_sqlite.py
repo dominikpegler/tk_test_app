@@ -1,9 +1,27 @@
 import pandas as pd
 import sqlite3
+import json
 
-SQLITE_STRING = "sqlite.db"
 
-def get_item(input):
+def load_config():
+
+    try:
+        with open("./config.json", "r", encoding="utf-8") as config_file:
+            config_data = json.load(config_file)
+
+        SQLITE_STRING = config_data["SQLITE_STRING"]
+
+        if SQLITE_STRING == "":
+            raise ValueError("SQLITE_STRING cannot be empty string")
+
+    except Exception as e:
+        output = "Problem beim Laden der Konfiguration (" + str(e) + ")"
+        return ("Err",output)
+
+    return ("Ok", SQLITE_STRING)
+
+
+def get_item(input,SQLITE_STRING):
 
     query = (
         f"""

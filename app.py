@@ -7,9 +7,8 @@ from tkinter.messagebox import showinfo, showerror, showwarning, askokcancel
 from sys import exit
 import platform
 from turtle import onclick
-from queries_oe import get_item # from queries_oe im...
-from queries_oe import load_config
-import time
+from queries_sqlite import load_config, get_item # from queries_oe im...
+
 
 def main():
 

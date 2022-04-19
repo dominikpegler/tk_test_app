@@ -9,7 +9,6 @@ NO_LOCK = " WITH (NOLOCK)"
 def load_config():
 
     try:
-
         with open("./config.json", "r", encoding="utf-8") as config_file:
             config_data = json.load(config_file)
 
@@ -29,7 +28,6 @@ def load_config():
         return ("Err",output)
 
     return ("Ok", OPENEDGE_STRING)
-
 
 
 def get_item(input, OPENEDGE_STRING):
