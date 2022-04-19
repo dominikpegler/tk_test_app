@@ -20,9 +20,6 @@ if OPENEDGE_STRING == "":
     raise ValueError("OPENEDGE_STRING cannot be empty string")
 
 
-print(OPENEDGE_STRING)
-
-
 def get_item(input):
 
     query = (

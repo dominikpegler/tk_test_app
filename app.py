@@ -5,7 +5,7 @@ from tkinter import Text, Menu, Tk
 from tkinter.font import Font
 from tkinter.messagebox import showinfo, showerror
 import platform
-from queries_oe import get_item
+from queries_test import get_item # from queries_oe im...
 
 APP_TITLE = "ProLite App"
 APP_VERSION = "0.0.1"
@@ -23,7 +23,6 @@ SYSTEM_INFO = (
     + "Architecture: "
     + platform.machine()
 )
-# ATTENTION: progress openedge driver 11.7 is required on server machine
 
 
 class Window(Frame):
@@ -82,7 +81,8 @@ class Window(Frame):
 
 
 root = Tk()
-root.iconbitmap("icon.ico")
+if platform.system() == "Windows":
+    root.iconbitmap("icon.ico")
 root.geometry(WINDOW_SIZE)
 text = Text(root)
 menu_font = Font(family=["Tahoma", "DejaVu Sans", "Helvetica", "Arial"], size=9)
