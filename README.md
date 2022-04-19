@@ -20,7 +20,7 @@ creates executables in dist/ directory
 
 creates executables in build/ directory
 
-### standard
+### default / linux
 
 `python3 setup.py build`
 
