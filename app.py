@@ -1,15 +1,29 @@
 #!/bin/python3
 
-from ast import AnnAssign
-from tkinter import Text, Frame, Menu, Label, Tk
+from tkinter.ttk import Frame, Label, Entry, Button
+from tkinter import Text, Menu, Tk
 from tkinter.font import Font
-import subprocess
-import re
+from tkinter.messagebox import showinfo, showerror
+import platform
+from queries_oe import get_item
 
-
-# BG_COLOR = "#9966ff"
-BG_COLOR = "#fff"
-BG_COLOR_2 = "#101a1f"
+APP_TITLE = "ProLite App"
+APP_VERSION = "0.0.1"
+WINDOW_SIZE = "800x600"
+SYSTEM_INFO = (
+    "\nHostname: "
+    + platform.node()
+    + "\n\n"
+    + "System: "
+    + platform.system()
+    + " ("
+    + str(platform.architecture()[0])
+    + ")"
+    + "\n\n"
+    + "Architecture: "
+    + platform.machine()
+)
+# ATTENTION: progress openedge driver 11.7 is required on server machine
 
 
 class Window(Frame):
@@ -21,82 +35,57 @@ class Window(Frame):
 
     # layout
     def init_window(self):
-        self.master.title("TestApp")
+        self.master.title(APP_TITLE)
+        self.pack(fill="both", expand=1, pady=30)
 
-        self.pack(fill="both", expand=1)
-
-        menu = Menu(self.master, bg=BG_COLOR)
+        menu = Menu(self.master)
         self.master.config(menu=menu)
 
         file = Menu(menu, tearoff=0)
-        file.add_command(label="Open")
+        file.add_command(label="Open", command=self.not_implemented)
         file.add_command(label="Exit", command=self.client_exit)
-        menu.add_cascade(label="File", font=myFont, menu=file)
+        menu.add_cascade(label="File", menu=file)
 
         edit = Menu(menu, tearoff=0)
-        edit.add_command(label="Import", command=self.import_csv)
-        menu.add_cascade(label="Edit", font=myFont, menu=edit)
+        edit.add_command(label="Import", command=self.not_implemented)
+        menu.add_cascade(label="Edit", menu=edit)
 
         help = Menu(menu, tearoff=0)
-        help.add_command(label="?")
-        help.add_command(label="Info")
-        menu.add_cascade(label="Help", font=myFont, menu=help)
+        help.add_command(label="?", command=self.show_about)
+        menu.add_cascade(label="Help", menu=help)
+
+        self.entry_field = Entry(self)
+        self.entry_field.bind("<Return>", self.call_item)
+        self.entry_field.pack()
+        # entry_field.place(x=80, y=150)
+
+        self.submit_button = Button(self, text="Submit", command=self.call_item)
+        self.submit_button.pack(pady=30)
+        # submit_button.place(x=80, y=100)
+
+        self.output_field = Label(self)
 
     # commands
-    def import_csv(self):
-        text = Label(self, text="Hey there!", bg=BG_COLOR)
-        text.pack()
+    def not_implemented(self, event=None):
+        showerror("Not implemented", "Function not yet implemented.")
+
+    def show_about(self):
+        showinfo("Info", APP_TITLE + " Version " + APP_VERSION + "\n" + SYSTEM_INFO)
 
     def client_exit(self):
         exit()
 
-    # def clean_output(self,text):
-    #     ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
-    #     result = ansi_escape.sub('', text)
-    #     return result
-
-    # def print_status(self):
-    #     sh_cmd = "expressvpn status"
-    #     process = subprocess.Popen(sh_cmd.split(), stdout=subprocess.PIPE)
-    #     output, error = process.communicate()
-    #     output = output.decode("utf-8")
-    #     output = self.clean_output(output)
-    #     text = Label(self, text=output, bg=BG_COLOR, justify="center")
-    #     text.pack()
-
-    def print_status(self):
-
-        import platform
-
-        output = (
-            "\nHostname: "
-            + platform.node()
-            + "\n\n"
-            + "OS: "
-            + platform.system()
-            + " ("
-            + str(platform.architecture()[0])
-            + ")"
-            + "\n\n"
-            + "Architektur: "
-            + platform.machine()
-            # + " ("
-            # + platform.processor()
-            # + ")\n"
-        )
-
-        text = Label(self, text=output, bg=BG_COLOR, justify="center")
-        text.pack()
+    def call_item(self, event=None):
+        item_info = get_item(self.entry_field.get())
+        self.output_field.config(text=item_info)
+        self.output_field.pack()
 
 
 root = Tk()
 root.iconbitmap("icon.ico")
-root.geometry("800x600")
+root.geometry(WINDOW_SIZE)
 text = Text(root)
-myFont = Font(family=["DejaVu Sans", "Tahoma", "Helvetica", "Arial"], size=10)
-text.configure(font=myFont)
+menu_font = Font(family=["Tahoma", "DejaVu Sans", "Helvetica", "Arial"], size=9)
+text.configure(font=menu_font)
 app = Window(root)
-app.print_status()
-root.configure(bg=BG_COLOR_2)
-app.configure(bg=BG_COLOR_2)
 root.mainloop()
