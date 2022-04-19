@@ -6,28 +6,28 @@ from tkinter.font import Font
 from tkinter.messagebox import showinfo, showerror, showwarning
 from sys import exit
 import platform
-from queries_sqlite import load_config, get_item # from queries_oe im...
+from queries_sqlite import load_config, get_item, get_next_item # from queries_oe im...
 
+APP_TITLE = "ProLite App"
+APP_VERSION = "0.0.1"
+WINDOW_SIZE = "800x600"
+SYSTEM_INFO = (
+    "\nHostname: "
+    + platform.node()
+    + "\n\n"
+    + "System: "
+    + platform.system()
+    + " ("
+    + str(platform.architecture()[0])
+    + ")"
+    + "\n\n"
+    + "Architecture: "
+    + platform.machine()
+)
+FONTS = ["Tahoma", "DejaVu Sans", "Helvetica", "Arial"]
+FONTSIZE = 9
 
 def main():
-
-    APP_TITLE = "ProLite App"
-    APP_VERSION = "0.0.1"
-    WINDOW_SIZE = "800x600"
-    SYSTEM_INFO = (
-        "\nHostname: "
-        + platform.node()
-        + "\n\n"
-        + "System: "
-        + platform.system()
-        + " ("
-        + str(platform.architecture()[0])
-        + ")"
-        + "\n\n"
-        + "Architecture: "
-        + platform.machine()
-    )
-
 
     class Window(Frame):
         def __init__(self, master=None):
@@ -59,7 +59,10 @@ def main():
 
             self.entry_field = Entry(self)
             self.entry_field.bind("<Return>", self.call_item)
+            self.entry_field.bind("<Prior>", self.call_next_item)
+            self.entry_field.bind("<Next>", self.call_next_item)
             self.entry_field.pack()
+            self.entry_field.focus_set()
             # entry_field.place(x=80, y=150)
 
             self.submit_button = Button(self, text="Submit", command=self.call_item)
@@ -68,17 +71,22 @@ def main():
 
             self.output_field = Label(self)
 
+            # load configuration file
             self.call_config()
+
 
         # commands
         def not_implemented(self, event=None):
             showinfo("Not implemented", "Function not yet implemented.")
 
+
         def show_about(self):
             showinfo("Info", APP_TITLE + " Version " + APP_VERSION + "\n" + SYSTEM_INFO)
 
+
         def client_exit(self):
             exit()
+
 
         def call_config(self):
             result,content = load_config()
@@ -90,16 +98,47 @@ def main():
             else:
                 showwarning("Warning","Undefined behavior.")
 
+
         def call_item(self, event=None):
+            
             result,content = get_item(self.entry_field.get(), self.database_string)
+            
             if result == "Ok":
                 self.output_field.config(text=content)
                 self.output_field.pack()
+                self.entry_field.focus_set()
+            
             elif result == "Err":
                 showerror("Error",content, parent=root)
                 exit()
+            
             else:
                 showwarning("Warning","Undefined behavior.")
+
+
+        def call_next_item(self, event=None):
+            
+            if event.keysym in ["Prior","Next"]:
+            
+                result,(input, content) = get_next_item(self.entry_field.get(), event.keysym, self.database_string)
+                
+                if result == "Ok":
+                    self.output_field.config(text=content)
+                    self.entry_field.delete(0, 'end')
+                    self.entry_field.insert(0, input)
+                    self.entry_field.focus_set()
+                
+                elif result == "Err":
+                    showerror("Error",content, parent=root)
+                    exit()
+                
+                else:
+                    showwarning("Warning","Undefined behavior.")
+            
+            else:
+                content = f"event.keysum can only be 'Prior' or 'Next', but is {str(event.keysym)}. Check code!"
+                showerror("Error",content, parent=root)
+                exit()
 
 
     root = Tk()
@@ -107,7 +146,7 @@ def main():
         root.iconbitmap("icon.ico")
     root.geometry(WINDOW_SIZE)
     text = Text(root)
-    menu_font = Font(family=["Tahoma", "DejaVu Sans", "Helvetica", "Arial"], size=9)
+    menu_font = Font(family=FONTS, size=FONTSIZE)
     text.configure(font=menu_font)
     app = Window(root)
     root.mainloop()

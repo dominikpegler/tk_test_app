@@ -65,3 +65,92 @@ def get_item(input,SQLITE_STRING):
     conn_sl.close()
 
     return "Ok", output
+
+
+def get_next_item(input,keysym,SQLITE_STRING):
+
+    if keysym == "Prior":
+
+        query = (f'''
+
+            SELECT
+                Artikel_prior,
+                SortBezeichnung_prior
+
+            FROM (
+                SELECT
+                    Artikel,
+                    SortBezeichnung,
+                    LAG(Artikel) over (order by Artikel) as Artikel_prior,
+                    LAG(SortBezeichnung) over (order by Artikel) as SortBezeichnung_prior
+                FROM
+                    S_Artikel
+                    
+                WHERE
+                    Firma = 200
+            ) AS t
+            
+            WHERE
+                Artikel = '{input}'
+            '''
+        )
+
+    elif keysym == "Next":
+        query = (f'''
+        
+            SELECT
+                Artikel_next,
+                SortBezeichnung_next
+
+            FROM (
+                SELECT
+                    Artikel,
+                    SortBezeichnung,
+                    LEAD(Artikel) over (order by Artikel) as Artikel_next,
+                    LEAD(SortBezeichnung) over (order by Artikel) as SortBezeichnung_next
+                FROM
+                    S_Artikel
+
+                WHERE
+                    Firma = 200
+            ) AS t
+            
+            WHERE
+                Artikel = '{input}'
+
+            '''
+        )
+
+    else:
+        output = f"event.keysym kann nur 'Prior' oder 'Next' sein, ist aber {str(keysym)}. Check Code!"
+        return "Err", (input,output)
+
+    try:
+        conn_sl = sqlite3.connect(SQLITE_STRING)
+
+    except Exception as e:
+        output = "Verbindung zu Datenbank fehlgeschlagen " + "(" + str(e) + ")"
+        return "Err", (input,output)
+
+    try:
+        df = pd.read_sql(query, conn_sl)
+    except Exception as e:
+        output = "Datenbankabfrage fehlerhaft " + "(" + str(e) + ")"
+        return "Err", (input,output)
+
+    if len(df) == 1:
+        output = tuple(df.iloc[0, 0:2])
+    elif len(df) == 2:
+        if keysym == "Next":
+            output = tuple(df.iloc[1, 0:2])
+        else:
+            output = tuple(df.iloc[0, 0:2])
+    elif len(df) > 2:
+        output = (input,"Fehler in Abfrage")
+    else:
+        output = (input,"Artikel nicht gefunden")
+
+    conn_sl.close()
+
+    return "Ok", output
+
