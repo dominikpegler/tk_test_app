@@ -3,7 +3,7 @@
 from tkinter.ttk import Frame, Label, Entry, Button
 from tkinter import Text, Menu, Tk
 from tkinter.font import Font
-from tkinter.messagebox import showinfo, showerror, showwarning, askokcancel
+from tkinter.messagebox import showinfo, showerror, showwarning
 from sys import exit
 import platform
 from queries_sqlite import load_config, get_item # from queries_oe im...
