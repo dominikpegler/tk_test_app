@@ -1,6 +1,8 @@
 import sqlite3
 import pandas as pd
 
+# show tables in db
+
 query = '''
 
 SELECT name FROM sqlite_master
