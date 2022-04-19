@@ -5,7 +5,7 @@ from tkinter import Text, Menu, Tk
 from tkinter.font import Font
 from tkinter.messagebox import showinfo, showerror
 import platform
-from queries_test import get_item # from queries_oe im...
+from queries_sqlite import get_item # from queries_oe im...
 
 APP_TITLE = "ProLite App"
 APP_VERSION = "0.0.1"
