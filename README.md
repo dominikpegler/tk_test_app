@@ -9,7 +9,7 @@ creates executables in dist/ directory
 
 `pyinstaller --windowed --clean -i icon.ico --add-data "icon.ico;." --add-data "config.json;." app.py`
 
-### with `--onefile` option
+### only one file option
 
 - make sure that icon.ico and config files (e.g. config.json) are also available at location of app.exe
 - --icon / -i option will not work with onefile
