@@ -7,7 +7,7 @@ import subprocess
 import re
 
 
-#BG_COLOR = "#9966ff"
+# BG_COLOR = "#9966ff"
 BG_COLOR = "#fff"
 BG_COLOR_2 = "#101a1f"
 
@@ -17,7 +17,7 @@ class Window(Frame):
         Frame.__init__(self, master)
 
         self.master = master
-        self.init_window()  
+        self.init_window()
 
     # layout
     def init_window(self):
@@ -50,28 +50,53 @@ class Window(Frame):
     def client_exit(self):
         exit()
 
-    def clean_output(self,text):
-        ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
-        result = ansi_escape.sub('', text)
-        return result
+    # def clean_output(self,text):
+    #     ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+    #     result = ansi_escape.sub('', text)
+    #     return result
+
+    # def print_status(self):
+    #     sh_cmd = "expressvpn status"
+    #     process = subprocess.Popen(sh_cmd.split(), stdout=subprocess.PIPE)
+    #     output, error = process.communicate()
+    #     output = output.decode("utf-8")
+    #     output = self.clean_output(output)
+    #     text = Label(self, text=output, bg=BG_COLOR, justify="center")
+    #     text.pack()
 
     def print_status(self):
-        sh_cmd = "expressvpn status"
-        process = subprocess.Popen(sh_cmd.split(), stdout=subprocess.PIPE)
-        output, error = process.communicate()
-        output = output.decode("utf-8")
-        output = self.clean_output(output)
+
+        import platform
+
+        output = (
+            "\nHostname: "
+            + platform.node()
+            + "\n\n"
+            + "OS: "
+            + platform.system()
+            + " ("
+            + str(platform.architecture()[0])
+            + ")"
+            + "\n\n"
+            + "Architektur: "
+            + platform.machine()
+            # + " ("
+            # + platform.processor()
+            # + ")\n"
+        )
+
         text = Label(self, text=output, bg=BG_COLOR, justify="center")
         text.pack()
 
 
 root = Tk()
+root.iconbitmap("icon.ico")
 root.geometry("800x600")
 text = Text(root)
-myFont = Font(family="DejaVu Sans", size=10)
+myFont = Font(family=["DejaVu Sans", "Tahoma", "Helvetica", "Arial"], size=10)
 text.configure(font=myFont)
 app = Window(root)
-status = app.print_status()
+app.print_status()
 root.configure(bg=BG_COLOR_2)
 app.configure(bg=BG_COLOR_2)
 root.mainloop()
