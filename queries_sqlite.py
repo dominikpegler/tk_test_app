@@ -24,8 +24,18 @@ def get_item(input):
         
     )
 
-    conn_sl = sqlite3.connect(SQLITE_STRING)
-    df = pd.read_sql(query, conn_sl)
+    try:
+        conn_sl = sqlite3.connect(SQLITE_STRING)
+
+    except Exception as e:
+        output = "Verbindung zu Datenbank fehlgeschlagen " + "(" + str(e) + ")"
+        return "Err", output
+
+    try:
+        df = pd.read_sql(query, conn_sl)
+    except Exception as e:
+        output = "Datenbankabfrage fehlerhaft " + "(" + str(e) + ")"
+        return "Err", output
 
     if len(df) == 1:
         output = df.iloc[0, 0]
@@ -36,4 +46,4 @@ def get_item(input):
 
     conn_sl.close()
 
-    return output
+    return "Ok", output

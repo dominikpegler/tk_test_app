@@ -4,23 +4,35 @@ import pyodbc
 import json
 
 
-with open("./config.json", "r", encoding="utf-8") as config_file:
-    config_data = json.load(config_file)
-
 NO_LOCK = " WITH (NOLOCK)"
-OPENEDGE_11_STRING_WIN = config_data["OPENEDGE_11_STRING_WIN"]
-OPENEDGE_11_STRING_LNX = config_data["OPENEDGE_11_STRING_LNX"]
 
-if platform.system() == "Windows":
-    OPENEDGE_STRING = OPENEDGE_11_STRING_WIN
-else:
-    OPENEDGE_STRING = OPENEDGE_11_STRING_LNX
+def load_config():
 
-if OPENEDGE_STRING == "":
-    raise ValueError("OPENEDGE_STRING cannot be empty string")
+    try:
+
+        with open("./config.json", "r", encoding="utf-8") as config_file:
+            config_data = json.load(config_file)
+
+        OPENEDGE_11_STRING_WIN = config_data["OPENEDGE_11_STRING_WIN"]
+        OPENEDGE_11_STRING_LNX = config_data["OPENEDGE_11_STRING_LNX"]
+
+        if platform.system() == "Windows":
+            OPENEDGE_STRING = OPENEDGE_11_STRING_WIN
+        else:
+            OPENEDGE_STRING = OPENEDGE_11_STRING_LNX
+
+        if OPENEDGE_STRING == "":
+            raise ValueError("OPENEDGE_STRING cannot be empty string")
+
+    except Exception as e:
+        output = "Problem beim Laden der Konfiguration (" + str(e) + ")"
+        return ("Err",output)
+
+    return ("Ok", OPENEDGE_STRING)
 
 
-def get_item(input):
+
+def get_item(input, OPENEDGE_STRING):
 
     query = (
         f"""
@@ -39,7 +51,13 @@ def get_item(input):
         + NO_LOCK
     )
 
-    conn_oe = pyodbc.connect(OPENEDGE_STRING)
+    try:
+        conn_oe = pyodbc.connect(OPENEDGE_STRING)
+
+    except Exception as e:
+        output = "Verbindung zu Datenbank fehlgeschlagen" + "(" + str(e) + ")"
+        return "Err", output
+
     df = pd.read_sql(query, conn_oe)
 
     if len(df) == 1:
@@ -51,4 +69,4 @@ def get_item(input):
 
     conn_oe.close()
 
-    return output
+    return "Ok", output
