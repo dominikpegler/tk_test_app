@@ -6,7 +6,11 @@ from tkinter.font import Font
 from tkinter.messagebox import showinfo, showerror, showwarning
 from sys import exit
 import platform
-from queries_sqlite import load_config, get_item, get_next_item  # from queries_oe im...
+from queries_sqlite import (
+    load_config,
+    get_item,
+    get_next_item,
+)  # from queries_oe, queries_sqlite ...
 
 APP_TITLE = "ProLite App"
 APP_VERSION = "0.0.1"
