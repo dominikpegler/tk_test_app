@@ -2,14 +2,19 @@ import json
 import shutil
 from pathlib import Path
 
-with open("./config.json", "r", encoding="utf-8") as config_file:
-    config_data = json.load(config_file)
+try:
+    with open("./config.json", "r", encoding="utf-8") as config_file:
+        config_data = json.load(config_file)
 
-PDF_DIR = config_data["PDF_DIR"]
-DWG_DIR = config_data["DWG_DIR"]
+    PDF_DIR = config_data["PDF_DIR"]
+    DWG_DIR = config_data["DWG_DIR"]
 
+except Exception as e:
+        print("Problem beim Laden der Folder-Konfiguration (" + str(e) + ")")
+        PDF_DIR = ""
+        DWG_DIR = ""
 
-def save_pdf(file):
+def save_pdf(file,PDF_DIR):
     try:
         shutil.copy(PDF_DIR + file, Path.joinpath(Path.home(), "Desktop"))
     except Exception as e:
@@ -18,7 +23,7 @@ def save_pdf(file):
     return "Ok", "PDF gespeichert."
 
 
-def save_dwg(file):
+def save_dwg(file,DWG_DIR):
     try:
         shutil.copy(DWG_DIR + file, Path.joinpath(Path.home(), "Desktop"))
     except Exception as e:
