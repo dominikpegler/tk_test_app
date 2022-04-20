@@ -1,5 +1,5 @@
 # tk_test_app
-a primitive tkinter app that you can quickly use for various tasks
+a primitive tkinter app that you can quickly use for various tasks. for running the code or compiling to executable use system's python interpreter instead of anaconda.
 
 ## compile to exe with pyinstaller
 
