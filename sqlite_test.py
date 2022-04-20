@@ -3,15 +3,15 @@ import pandas as pd
 
 # show tables in db
 
-query = '''
+query = """
 
 SELECT name FROM sqlite_master
 WHERE type='table'
 ORDER BY name;
 
-'''
+"""
 
-query_2 = '''
+query_2 = """
          SELECT
 
                 SortBezeichnung
@@ -24,9 +24,9 @@ query_2 = '''
                 Artikel = '103033'
 
             LIMIT 1
-'''
+"""
 
-query_3 = '''
+query_3 = """
             SELECT
                 Artikel_prior,
                 SortBezeichnung_prior
@@ -44,9 +44,9 @@ query_3 = '''
             WHERE
                 Artikel = '103033'
 
-'''
+"""
 
-query_4 = '''
+query_4 = """
             SELECT
                 Artikel_next,
                 SortBezeichnung_next
@@ -64,10 +64,10 @@ query_4 = '''
             WHERE
                 Artikel = '103033'
 
-'''
+"""
 
 conn = sqlite3.connect("sqlite.db")
-df = pd.read_sql(query_2, conn)
+df = pd.read_sql(query, conn)
 conn.close()
 
 print(df)

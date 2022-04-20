@@ -6,7 +6,7 @@ from tkinter.font import Font
 from tkinter.messagebox import showinfo, showerror, showwarning
 from sys import exit
 import platform
-from queries_sqlite import load_config, get_item, get_next_item # from queries_oe im...
+from queries_sqlite import load_config, get_item, get_next_item  # from queries_oe im...
 
 APP_TITLE = "ProLite App"
 APP_VERSION = "0.0.1"
@@ -27,8 +27,8 @@ SYSTEM_INFO = (
 FONTS = ["Tahoma", "DejaVu Sans", "Helvetica", "Arial"]
 FONTSIZE = 9
 
-def main():
 
+def main():
     class Window(Frame):
         def __init__(self, master=None):
             Frame.__init__(self, master)
@@ -74,72 +74,67 @@ def main():
             # load configuration file
             self.call_config()
 
-
         # commands
         def not_implemented(self, event=None):
             showinfo("Not implemented", "Function not yet implemented.")
 
-
         def show_about(self):
             showinfo("Info", APP_TITLE + " Version " + APP_VERSION + "\n" + SYSTEM_INFO)
-
 
         def client_exit(self):
             exit()
 
-
         def call_config(self):
-            result,content = load_config()
+            result, content = load_config()
             if result == "Ok":
                 self.database_string = content
             elif result == "Err":
-                showerror("Error",content, parent=root)
+                showerror("Error", content, parent=root)
                 exit()
             else:
-                showwarning("Warning","Undefined behavior.")
-
+                showwarning("Warning", "Undefined behavior.")
 
         def call_item(self, event=None):
-            
-            result,content = get_item(self.entry_field.get(), self.database_string)
-            
+
+            result, content = get_item(self.entry_field.get(), self.database_string)
+
             if result == "Ok":
                 self.output_field.config(text=content)
                 self.output_field.pack()
                 self.entry_field.focus_set()
-            
-            elif result == "Err":
-                showerror("Error",content, parent=root)
-                exit()
-            
-            else:
-                showwarning("Warning","Undefined behavior.")
 
+            elif result == "Err":
+                showerror("Error", content, parent=root)
+                exit()
+
+            else:
+                showwarning("Warning", "Undefined behavior.")
 
         def call_next_item(self, event=None):
-            
-            if event.keysym in ["Prior","Next"]:
-            
-                result,(input, content) = get_next_item(self.entry_field.get(), event.keysym, self.database_string)
-                
+
+            if event.keysym in ["Prior", "Next"]:
+
+                result, (input, content) = get_next_item(
+                    self.entry_field.get(), event.keysym, self.database_string
+                )
+
                 if result == "Ok":
                     self.output_field.config(text=content)
-                    self.entry_field.delete(0, 'end')
+                    self.entry_field.delete(0, "end")
                     self.entry_field.insert(0, input)
                     self.entry_field.focus_set()
-                
+
                 elif result == "Err":
-                    showerror("Error",content, parent=root)
+                    showerror("Error", content, parent=root)
                     exit()
-                
+
                 else:
-                    showwarning("Warning","Undefined behavior.")
-            
+                    showwarning("Warning", "Undefined behavior.")
+
             else:
                 content = f"event.keysum can only be 'Prior' or 'Next', but is {str(event.keysym)}. Check code!"
-                showerror("Error",content, parent=root)
+                showerror("Error", content, parent=root)
                 exit()
-
 
     root = Tk()
     if platform.system() == "Windows":
@@ -151,5 +146,6 @@ def main():
     app = Window(root)
     root.mainloop()
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     main()
