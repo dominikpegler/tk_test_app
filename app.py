@@ -6,12 +6,13 @@ from tkinter.font import Font
 from tkinter.messagebox import showinfo, showerror, showwarning
 from sys import exit
 import platform
-from queries_sqlite import (
+from queries import (
     load_config,
     get_item,
     get_next_item,
-)  # from queries_oe, queries_sqlite ...
+)
 
+DB = "SL"  # 'SL' or 'OE'
 APP_TITLE = "ProLite App"
 APP_VERSION = "0.0.1"
 WINDOW_SIZE = "800x600"
@@ -89,7 +90,7 @@ def main():
             exit()
 
         def call_config(self):
-            result, content = load_config()
+            result, content = load_config(DB)
             if result == "Ok":
                 self.database_string = content
             elif result == "Err":
@@ -100,7 +101,7 @@ def main():
 
         def call_item(self, event=None):
 
-            result, content = get_item(self.entry_field.get(), self.database_string)
+            result, content = get_item(self.entry_field.get(), self.database_string, DB)
 
             if result == "Ok":
                 self.output_field.config(text=content)
@@ -119,7 +120,7 @@ def main():
             if event.keysym in ["Prior", "Next"]:
 
                 result, (input, content) = get_next_item(
-                    self.entry_field.get(), event.keysym, self.database_string
+                    self.entry_field.get(), event.keysym, self.database_string, DB
                 )
 
                 if result == "Ok":
