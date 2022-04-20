@@ -12,9 +12,9 @@ from queries import (
     get_next_item,
 )
 
-DB = "SL"  # 'SL' or 'OE'
+DB = "OE"  # 'SL' or 'OE'
 APP_TITLE = "ProLite App"
-APP_VERSION = "0.0.1"
+APP_VERSION = "0.0.1a"
 WINDOW_SIZE = "800x600"
 SYSTEM_INFO = (
     "\nHostname: "

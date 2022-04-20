@@ -107,7 +107,7 @@ def get_item(input, CONN_STRING, DB):
 
 def get_next_item(input, keysym, CONN_STRING, DB):
 
-    NO_LOCK = " WITH (NOLOCK)" if DB == "OE" else ""
+    no_lock = " WITH (NOLOCK)" if DB == "OE" else ""
 
     if keysym in ["Prior", "Up"]:
         operator = "<="
@@ -139,7 +139,7 @@ def get_next_item(input, keysym, CONN_STRING, DB):
 
             {limited}
 
-            {NO_LOCK}
+            {no_lock}
             """
 
     try:
