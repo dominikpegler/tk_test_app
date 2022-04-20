@@ -11,6 +11,7 @@ from queries import (
     get_item,
     get_next_item,
 )
+from save_drawings import save_pdf, save_dwg
 
 DB = "OE"  # 'SL' or 'OE'
 APP_TITLE = "ProLite App"
@@ -77,6 +78,12 @@ def main():
             # submit_button.place(x=80, y=100)
 
             self.output_field = Label(self)
+            self.output_field.pack(pady=30)
+
+            self.download_button = Button(
+                self, text="Download PDF + DWG", command=self.download_drawings
+            )
+            self.download_button.pack(pady=30)
 
             # load configuration file
             self.call_config()
@@ -101,17 +108,49 @@ def main():
             else:
                 showwarning("Warning", "Undefined behavior.")
 
+        def download_drawings(self):
+            if self.pdf_file == "":
+                result_1, msg_1 = "Err", "Kein PDF hinterlegt."
+            else:
+                result_1, msg_1 = save_pdf(self.pdf_file)
+            if self.dwg_file == "":
+                result_2, msg_2 = "Err", "Kein DWG hinterlegt."
+            else:
+                result_2, msg_2 = save_dwg(self.dwg_file)
+
+            if (result_1 == "Ok") & (result_2 == "Ok"):
+                showinfo("Info", "Zeichnungen gespeichert!")
+            elif (result_1 == "Err") | (result_2 == "Err"):
+                showwarning("Hinweis", msg_1 + " " + msg_2, parent=root)
+            else:
+                print("result_1", result_1)
+                print("result_2", result_2)
+                showwarning("Warning", "Undefined behavior.")
+
         def call_item(self, event=None):
 
             result, content = get_item(self.entry_field.get(), self.database_string, DB)
 
+            self.pdf_file = str(content[3] or "")
+            self.dwg_file = str(content[4] or "")
+
             if result == "Ok":
-                self.output_field.config(text=content)
+                self.output_field.config(
+                    text=content[0]
+                    + "\n\nZeichnung: "
+                    + str(content[1])
+                    + "\nIndex: "
+                    + str(content[2])
+                    + "\nBild: "
+                    + self.pdf_file
+                    + "\nCAD: "
+                    + self.dwg_file
+                )
                 self.output_field.pack()
                 self.entry_field.focus_set()
 
             elif result == "Err":
-                showerror("Error", content, parent=root)
+                showerror("Error", content[0], parent=root)
                 exit()
 
             else:
@@ -121,12 +160,25 @@ def main():
 
             if event.keysym in ["Prior", "Next", "Up", "Down"]:
 
-                result, (input, content) = get_next_item(
+                result, (input, *content) = get_next_item(
                     self.entry_field.get(), event.keysym, self.database_string, DB
                 )
 
+                self.pdf_file = str(content[3] or "")
+                self.dwg_file = str(content[4] or "")
+
                 if result == "Ok":
-                    self.output_field.config(text=content)
+                    self.output_field.config(
+                        text=content[0]
+                        + "\n\nZeichnung: "
+                        + str(content[1])
+                        + "\nIndex: "
+                        + str(content[2])
+                        + "\nBild: "
+                        + self.pdf_file
+                        + "\nCAD: "
+                        + self.dwg_file
+                    )
                     self.output_field.pack()
                     self.entry_field.delete(0, "end")
                     self.entry_field.insert(0, input)

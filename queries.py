@@ -40,43 +40,64 @@ def load_config(DB):
 
 def get_item(input, CONN_STRING, DB):
 
-    NO_LOCK = " WITH (NOLOCK)" if DB == "OE" else ""
+    no_lock = " WITH (NOLOCK)" if DB == "OE" else ""
+    limited = " LIMIT 1 " if DB == "SL" else ""
+    top = " TOP 1 " if DB == "OE" else ""
 
-    query_sl = f"""
-            SELECT
-                SortBezeichnung
+    query = f"""
             
+            SELECT {top}
+                S_ArtikelSpr.Bezeichnung,
+                P_ZeichnungArtikel.Zeichnung,
+                PMM_Drawing.IndexNo AS 'IndexNr',
+                PMM_Drawing.ImageNumber AS 'BildNummer',
+                PMM_Drawing.CadNumber AS 'CADNummer'
+    
             FROM
                 S_Artikel
 
-            WHERE
-                Firma = 200
+            LEFT JOIN
+                S_ArtikelSpr
+            ON
+                S_Artikel.Firma = S_ArtikelSpr.Firma
             AND
-                Artikel = '{input}'
+                S_Artikel.Artikel = S_ArtikelSpr.Artikel
 
-            LIMIT 1
-    
-    """
+            LEFT JOIN
+                P_ZeichnungArtikel
+            ON
+                S_Artikel.Firma=P_ZeichnungArtikel.Firma
+            AND
+                S_Artikel.Artikel=P_ZeichnungArtikel.Artikel
+                
+            LEFT JOIN
+                PMM_Drawing
+            ON
+                P_ZeichnungArtikel.Firma=PMM_Drawing.Company
+            AND
+                P_ZeichnungArtikel.Zeichnung=PMM_Drawing.PMM_Drawing_ID
 
-    query_oe = (
-        f"""
-            SELECT TOP 1
-
-                SortBezeichnung
-            
-            FROM
-                S_Artikel
+            LEFT JOIN
+                PMM_DrawingMaster
+            ON
+                PMM_Drawing.Company=PMM_DrawingMaster.Company
+            AND
+                PMM_Drawing.PMM_DrawingMaster_Obj=PMM_DrawingMaster.PMM_DrawingMaster_Obj
 
             WHERE
-                Firma = 200
+                S_Artikel.Firma = 200
             AND
-                Artikel = '{input}'
-    
-    """
-        + NO_LOCK
-    )
+                S_Artikel.Artikel = '{input}'
+            AND
+                Sprache = 'D'
+            AND
+                (P_ZeichnungArtikel.Hauptzeichnung=1 OR P_ZeichnungArtikel.Hauptzeichnung IS NULL)
 
-    query = query_oe if DB == "OE" else query_sl
+            {limited}
+
+            {no_lock}
+
+            """
 
     try:
         conn = (
@@ -94,11 +115,13 @@ def get_item(input, CONN_STRING, DB):
         return "Err", output
 
     if len(df) == 1:
-        output = df.iloc[0, 0]
+        name, drawing, idx, img, cad = df.iloc[0, 0:5]
+        name = name.replace(";", "\n")
+        output = (name, drawing, idx, img, cad)
     elif len(df) > 1:
-        output = "Fehler in Abfrage"
+        output = ("Fehler in Abfrage",)
     else:
-        output = "Artikel nicht gefunden"
+        output = ("Artikel nicht gefunden",)
 
     conn.close()
 
@@ -111,7 +134,7 @@ def get_next_item(input, keysym, CONN_STRING, DB):
 
     if keysym in ["Prior", "Up"]:
         operator = "<="
-        ordered = " ORDER BY Artikel DESC "
+        ordered = " ORDER BY S_Artikel.Artikel DESC "
     elif keysym in ["Next", "Down"]:
         operator = ">="
         ordered = " "
@@ -123,23 +146,61 @@ def get_next_item(input, keysym, CONN_STRING, DB):
     top = " TOP 2 " if DB == "OE" else ""
 
     query = f"""
+            
             SELECT {top}
-                Artikel,
-                SortBezeichnung
-
+                S_Artikel.Artikel,
+                S_ArtikelSpr.Bezeichnung,
+                P_ZeichnungArtikel.Zeichnung,
+                PMM_Drawing.IndexNo AS 'IndexNr',
+                PMM_Drawing.ImageNumber AS 'BildNummer',
+                PMM_Drawing.CadNumber AS 'CADNummer'
+    
             FROM
                 S_Artikel
-            
-            WHERE
-                Artikel {operator} '{input}'
+
+            LEFT JOIN
+                S_ArtikelSpr
+            ON
+                S_Artikel.Firma = S_ArtikelSpr.Firma
             AND
-                Firma = 200
+                S_Artikel.Artikel = S_ArtikelSpr.Artikel
+
+            LEFT JOIN
+                P_ZeichnungArtikel
+            ON
+                S_Artikel.Firma=P_ZeichnungArtikel.Firma
+            AND
+                S_Artikel.Artikel=P_ZeichnungArtikel.Artikel
+                
+            LEFT JOIN
+                PMM_Drawing
+            ON
+                P_ZeichnungArtikel.Firma=PMM_Drawing.Company
+            AND
+                P_ZeichnungArtikel.Zeichnung=PMM_Drawing.PMM_Drawing_ID
+
+            LEFT JOIN
+                PMM_DrawingMaster
+            ON
+                PMM_Drawing.Company=PMM_DrawingMaster.Company
+            AND
+                PMM_Drawing.PMM_DrawingMaster_Obj=PMM_DrawingMaster.PMM_DrawingMaster_Obj
+
+            WHERE
+                S_Artikel.Firma = 200
+            AND
+                S_Artikel.Artikel {operator} '{input}'
+            AND
+                Sprache = 'D'
+            AND
+                (P_ZeichnungArtikel.Hauptzeichnung=1 OR P_ZeichnungArtikel.Hauptzeichnung IS NULL)
 
             {ordered}
 
             {limited}
 
             {no_lock}
+
             """
 
     try:
@@ -158,9 +219,13 @@ def get_next_item(input, keysym, CONN_STRING, DB):
         return "Err", (input, output)
 
     if len(df) == 1:
-        output = tuple(df.iloc[0, 0:2])
+        input_new, name, drawing, idx, img, cad = df.iloc[0, 0:6]
+        name = name.replace(";", "\n")
+        output = (input_new, name, drawing, idx, img, cad)
     elif len(df) == 2:
-        output = tuple(df.iloc[1, 0:2])
+        input_new, name, drawing, idx, img, cad = df.iloc[1, 0:6]
+        name = name.replace(";", "\n")
+        output = (input_new, name, drawing, idx, img, cad)
     elif len(df) > 2:
         output = (input, "Fehler in Abfrage")
     else:
