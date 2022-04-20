@@ -2,7 +2,7 @@ import sys
 from cx_Freeze import setup, Executable
 
 APP_NAME = "ProLite App"
-APP_VERSION = "0.0.1a"
+APP_VERSION = "0.0.1"
 
 build_exe_options = {
     "include_files": ["icon.ico", "config.json"],
