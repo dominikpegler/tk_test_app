@@ -131,16 +131,19 @@ def main():
 
             result, content = get_item(self.entry_field.get(), self.database_string, DB)
 
+            self.name = content[0]
+            self.drawing = str(content[1] or "")
+            self.idx = str(content[2] or "")
             self.pdf_file = str(content[3] or "")
             self.dwg_file = str(content[4] or "")
 
             if result == "Ok":
                 self.output_field.config(
-                    text=content[0]
+                    text=self.name
                     + "\n\nZeichnung: "
-                    + str(content[1])
+                    + self.drawing
                     + "\nIndex: "
-                    + str(content[2])
+                    + self.idx
                     + "\nBild: "
                     + self.pdf_file
                     + "\nCAD: "
@@ -164,16 +167,19 @@ def main():
                     self.entry_field.get(), event.keysym, self.database_string, DB
                 )
 
+                self.name = content[0]
+                self.drawing = str(content[1] or "")
+                self.idx = str(content[2] or "")
                 self.pdf_file = str(content[3] or "")
                 self.dwg_file = str(content[4] or "")
 
                 if result == "Ok":
                     self.output_field.config(
-                        text=content[0]
+                        text=self.name
                         + "\n\nZeichnung: "
-                        + str(content[1])
+                        + self.drawing
                         + "\nIndex: "
-                        + str(content[2])
+                        + self.idx
                         + "\nBild: "
                         + self.pdf_file
                         + "\nCAD: "
