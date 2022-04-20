@@ -1,12 +1,13 @@
 import sys
 from cx_Freeze import setup, Executable
 
+APP_NAME = "ProLite App"
+APP_VERSION = "0.0.1"
+
 # Dependencies are automatically detected, but it might need fine tuning.
 # "packages": ["os"] is used as example only
 build_exe_options = {
-    "packages": ["os"],
-    "excludes": [],
-    "include_files": ["sqlite.db", "icon.ico", "config.json"],
+    "include_files": ["icon.ico", "config.json"],
 }
 
 directory_table = [
@@ -25,10 +26,11 @@ msi_data = {
 }
 
 bdist_msi_options = {
-    "add_to_path": True,
+    "add_to_path": False,
+    "all_users": False,
     "data": msi_data,
-    "environment_variables": [("E_MYAPP_VAR", "=-*MYAPP_VAR", "1", "TARGETDIR")],
-    "upgrade_code": "{XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}",
+    "upgrade_code": "{69f53468-5152-4897-9757-2386c0d99dfd}",
+    "install_icon": "icon.ico",
 }
 
 # base="Win32GUI" should be used only for Windows GUI app
@@ -37,9 +39,17 @@ if sys.platform == "win32":
     base = "Win32GUI"
 
 setup(
-    name="ProLite App",
-    version="0.0.1",
+    name=APP_NAME,
+    version=APP_VERSION,
     description="",
     options={"build_exe": build_exe_options, "bdist_msi": bdist_msi_options},
-    executables=[Executable("app.py", icon="icon.ico", base=base)],
+    executables=[
+        Executable(
+            "app.py",
+            icon="icon.ico",
+            shortcut_name=APP_NAME,
+            shortcut_dir="DesktopFolder",
+            base=base,
+        )
+    ],
 )
