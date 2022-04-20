@@ -4,8 +4,6 @@ import pyodbc
 import json
 import platform
 
-NO_LOCK = " WITH (NOLOCK)"
-
 
 def load_config(DB):
 
@@ -41,6 +39,8 @@ def load_config(DB):
 
 
 def get_item(input, CONN_STRING, DB):
+
+    NO_LOCK = " WITH (NOLOCK)" if DB == "OE" else ""
 
     query_sl = f"""
             SELECT
@@ -107,69 +107,52 @@ def get_item(input, CONN_STRING, DB):
 
 def get_next_item(input, keysym, CONN_STRING, DB):
 
+    NO_LOCK = " WITH (NOLOCK)" if DB == "OE" else ""
+
     if keysym == "Prior":
-
-        query = f"""
-
-            SELECT
-                Artikel_prior,
-                SortBezeichnung_prior
-
-            FROM (
-                SELECT
-                    Artikel,
-                    SortBezeichnung,
-                    LAG(Artikel) over (order by Artikel) as Artikel_prior,
-                    LAG(SortBezeichnung) over (order by Artikel) as SortBezeichnung_prior
-                FROM
-                    S_Artikel
-                    
-                WHERE
-                    Firma = 200
-            ) AS t
-            
-            WHERE
-                Artikel = '{input}'
-            """
-
+        operator = "<="
+        ordered = " ORDER BY Artikel DESC "
     elif keysym == "Next":
-        query = f"""
-        
-            SELECT
-                Artikel_next,
-                SortBezeichnung_next
-
-            FROM (
-                SELECT
-                    Artikel,
-                    SortBezeichnung,
-                    LEAD(Artikel) over (order by Artikel) as Artikel_next,
-                    LEAD(SortBezeichnung) over (order by Artikel) as SortBezeichnung_next
-                FROM
-                    S_Artikel
-
-                WHERE
-                    Firma = 200
-            ) AS t
-            
-            WHERE
-                Artikel = '{input}'
-
-            """
-
+        operator = ">="
+        ordered = " "
     else:
         output = f"event.keysym kann nur 'Prior' oder 'Next' sein, ist aber {str(keysym)}. Check Code!"
         return "Err", (input, output)
 
+    limited = " LIMIT 2 " if DB == "SL" else ""
+    top = " TOP 2 " if DB == "OE" else ""
+
+    query = f"""
+            SELECT {top}
+                Artikel,
+                SortBezeichnung
+
+            FROM
+                S_Artikel
+            
+            WHERE
+                Artikel {operator} '{input}'
+            AND
+                Firma = 200
+
+            {ordered}
+
+            {limited}
+
+            {NO_LOCK}
+            """
+
     try:
-        conn_sl = sqlite3.connect(CONN_STRING)
+        conn = (
+            pyodbc.connect(CONN_STRING) if DB == "OE" else sqlite3.connect(CONN_STRING)
+        )
 
     except Exception as e:
         output = "Verbindung zu Datenbank fehlgeschlagen " + "(" + str(e) + ")"
         return "Err", (input, output)
 
     try:
-        df = pd.read_sql(query, conn_sl)
+        df = pd.read_sql(query, conn)
     except Exception as e:
         output = "Datenbankabfrage fehlerhaft " + "(" + str(e) + ")"
         return "Err", (input, output)
@@ -177,15 +160,12 @@ def get_next_item(input, keysym, CONN_STRING, DB):
     if len(df) == 1:
         output = tuple(df.iloc[0, 0:2])
     elif len(df) == 2:
-        if keysym == "Next":
-            output = tuple(df.iloc[1, 0:2])
-        else:
-            output = tuple(df.iloc[0, 0:2])
+        output = tuple(df.iloc[1, 0:2])
     elif len(df) > 2:
         output = (input, "Fehler in Abfrage")
     else:
         output = (input, "Artikel nicht gefunden")
 
-    conn_sl.close()
+    conn.close()
 
     return "Ok", output
