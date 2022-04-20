@@ -109,14 +109,14 @@ def get_next_item(input, keysym, CONN_STRING, DB):
 
     NO_LOCK = " WITH (NOLOCK)" if DB == "OE" else ""
 
-    if keysym == "Prior":
+    if keysym in ["Prior", "Up"]:
         operator = "<="
         ordered = " ORDER BY Artikel DESC "
-    elif keysym == "Next":
+    elif keysym in ["Next", "Down"]:
         operator = ">="
         ordered = " "
     else:
-        output = f"event.keysym kann nur 'Prior' oder 'Next' sein, ist aber {str(keysym)}. Check Code!"
+        output = f"event.keysym kann nur 'Up', 'Down', 'Prior' oder 'Next' sein, ist aber {str(keysym)}. Check Code!"
         return "Err", (input, output)
 
     limited = " LIMIT 2 " if DB == "SL" else ""

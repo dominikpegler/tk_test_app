@@ -65,6 +65,8 @@ def main():
             self.entry_field = Entry(self)
             self.entry_field.bind("<Return>", self.call_item)
             self.entry_field.bind("<Prior>", self.call_next_item)
+            self.entry_field.bind("<Up>", self.call_next_item)
+            self.entry_field.bind("<Down>", self.call_next_item)
             self.entry_field.bind("<Next>", self.call_next_item)
             self.entry_field.pack()
             self.entry_field.focus_set()
@@ -117,7 +119,7 @@ def main():
 
         def call_next_item(self, event=None):
 
-            if event.keysym in ["Prior", "Next"]:
+            if event.keysym in ["Prior", "Next", "Up", "Down"]:
 
                 result, (input, content) = get_next_item(
                     self.entry_field.get(), event.keysym, self.database_string, DB
@@ -125,6 +127,7 @@ def main():
 
                 if result == "Ok":
                     self.output_field.config(text=content)
+                    self.output_field.pack()
                     self.entry_field.delete(0, "end")
                     self.entry_field.insert(0, input)
                     self.entry_field.focus_set()
@@ -137,7 +140,7 @@ def main():
                     showwarning("Warning", "Undefined behavior.")
 
             else:
-                content = f"event.keysum can only be 'Prior' or 'Next', but is {str(event.keysym)}. Check code!"
+                content = f"event.keysym kann nur 'Up', 'Down', 'Prior' oder 'Next' sein, ist aber {str(event.keysym)}. Check code!"
                 showerror("Error", content, parent=root)
                 exit()
 

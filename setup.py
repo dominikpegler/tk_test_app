@@ -2,10 +2,8 @@ import sys
 from cx_Freeze import setup, Executable
 
 APP_NAME = "ProLite App"
-APP_VERSION = "0.0.1"
+APP_VERSION = "0.0.1a"
 
-# Dependencies are automatically detected, but it might need fine tuning.
-# "packages": ["os"] is used as example only
 build_exe_options = {
     "include_files": ["icon.ico", "config.json"],
 }
@@ -33,7 +31,6 @@ bdist_msi_options = {
     "install_icon": "icon.ico",
 }
 
-# base="Win32GUI" should be used only for Windows GUI app
 base = None
 if sys.platform == "win32":
     base = "Win32GUI"
