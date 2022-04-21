@@ -133,7 +133,8 @@ def main():
                     "Fehlt:\n\n"
                     + self.driver_required
                     + "\n\n\nInstalliert:\n\n"
-                    + "\n".join(ODBC_DRIVERS),
+                    + "\n".join(ODBC_DRIVERS)
+                    + "\n\nBitte wenden Sie sich an Ihren Systemadministrator.",
                     parent=root,
                 )
                 exit()
