@@ -12,6 +12,9 @@ from queries import (
     get_next_item,
 )
 from save_drawings import save_pdf, save_dwg
+from pyodbc import drivers
+import re
+
 
 DB = "OE"  # 'SL' or 'OE'
 APP_TITLE = "ProLite App"
@@ -32,6 +35,7 @@ SYSTEM_INFO = (
 )
 FONTS = ["Tahoma", "DejaVu Sans", "Helvetica", "Arial"]
 FONTSIZE = 9
+ODBC_DRIVERS = drivers()
 
 
 def main():
@@ -93,7 +97,19 @@ def main():
             showinfo("Not implemented", "Function not yet implemented.")
 
         def show_about(self):
-            showinfo("Info", APP_TITLE + " Version " + APP_VERSION + "\n" + SYSTEM_INFO)
+
+            showinfo(
+                "Info",
+                APP_TITLE
+                + " Version "
+                + APP_VERSION
+                + "\n"
+                + SYSTEM_INFO
+                + "\n\nODBC-Driver required:\n"
+                + self.driver_required
+                + "\n\nODBC-Drivers installed:\n"
+                + ", ".join(ODBC_DRIVERS),
+            )
 
         def client_exit(self):
             exit()
@@ -102,11 +118,25 @@ def main():
             result, content = load_config(DB)
             if result == "Ok":
                 self.database_string = content
+                self.driver_required = re.search(
+                    r"DRIVER={(.*?)}", self.database_string
+                ).group(1)
             elif result == "Err":
                 showerror("Error", content, parent=root)
                 exit()
             else:
                 showwarning("Warning", "Undefined behavior.")
+
+            if self.driver_required not in ODBC_DRIVERS:
+                showerror(
+                    "ODBC-Treiber fehlt",
+                    "Fehlt:\n\n"
+                    + self.driver_required
+                    + "\n\n\nInstalliert:\n\n"
+                    + "\n".join(ODBC_DRIVERS),
+                    parent=root,
+                )
+                exit()
 
         def download_drawings(self):
             if self.pdf_file == "":

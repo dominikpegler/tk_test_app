@@ -27,7 +27,7 @@ bdist_msi_options = {
     "add_to_path": False,
     "all_users": False,
     "data": msi_data,
-    "upgrade_code": "{69f53468-5152-4897-9757-2386c0d99dfd}",
+    "upgrade_code": "{69f53468-5152-4897-9757-2386d0d99dfd}",
     "install_icon": "icon.ico",
 }
 
